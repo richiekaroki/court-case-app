@@ -1,0 +1,29 @@
+:root {
+    --bg-body-color: #fbfef8;
+    --primary-color: #88d43c;
+    /* --secondary-color: #9be0ae; */
+    --secondary-color: #96e8aa;
+    /* --accent-color: #6fd3cf; */
+    --accent-color: #5edc92;
+    --text-color: #130606;
+}
+
+body, html {
+    margin: 0 !important;
+    font-family: "Afacad Flux", sans-serif;
+    padding: 0 16px;
+    background-color: var(--bg-body-color);
+    color: var(--text-color);
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+.chartData {
+    width: 800px;
+}
+
+.page-container {
+    margin-top: 16px;
+}

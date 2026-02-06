@@ -1,0 +1,44 @@
+.navbar {
+    width: 100%;
+    display: flex;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--accent-color);
+}
+
+.navbar-logo {
+    display: flex;
+    align-items: center;
+    width: 30%;
+}
+
+.navbar-logo p {
+    margin-left: 16px;
+    font-weight: 600;
+    font-size: 20px;
+}
+
+.navbar-items {
+    width: 70%;
+}
+
+.navbar-items ul {
+    display: flex;
+    list-style-type: none;
+    justify-content: end;
+    align-items: center;
+}
+
+.navbar-items a {
+    text-decoration: none;
+    padding: 0 16px;
+}
+
+.navbar-items ul > li > button {
+    background-color: var(--primary-color);
+    border: 0px solid transparent;
+    padding: 8px 16px;
+    /* color: white; */
+    margin-left: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
