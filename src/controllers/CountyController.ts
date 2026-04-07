@@ -1,31 +1,27 @@
 import { Request, Response } from "express";
 import { Op } from "sequelize";
 import sequelize from "../middleware/sequelize.js";
-import { Advocate, CaseAdvocate, Case, Court } from "../models/index.js";
+import { Case, County, Court } from "../models/index.js";
 
 /**
- * Get all advocates with pagination and search
+ * Get all counties with pagination and search
  */
-const getAllAdvocates = async (req: Request, res: Response): Promise<void> => {
+const getAllCounties = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { page = 1, limit = 20, search, type } = req.query;
+        const { page = 1, limit = 50, search } = req.query;
         const offset = (Number(page) - 1) * Number(limit);
 
         const where: any = {};
 
         if (search) {
-            where.name = { [Op.iLike]: `%${search}%` };
+            where.county = { [Op.iLike]: `%${search}%` };
         }
 
-        if (type) {
-            where.type = type;
-        }
-
-        const { count, rows } = await Advocate.findAndCountAll({
+        const { count, rows } = await County.findAndCountAll({
             where,
             limit: Number(limit),
             offset,
-            order: [['name', 'ASC']]
+            order: [['county', 'ASC']]
         });
 
         res.json({
@@ -39,60 +35,67 @@ const getAllAdvocates = async (req: Request, res: Response): Promise<void> => {
             }
         });
     } catch (err: any) {
-        console.error('Error in getAllAdvocates:', err);
+        console.error('Error in getAllCounties:', err);
         res.status(500).json({ 
             success: false,
-            error: 'Failed to fetch advocates',
+            error: 'Failed to fetch counties',
             message: err.message 
         });
     }
 };
 
 /**
- * Get a single advocate by ID
+ * Get a single county by ID
  */
-const getAdvocateById = async (req: Request, res: Response): Promise<void> => {
+const getCountyById = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
 
-        const advocate = await Advocate.findByPk(id);
+        const county = await County.findByPk(id, {
+            include: [
+                {
+                    model: Court,
+                    as: 'courts'
+                }
+            ]
+        });
 
-        if (!advocate) {
+        if (!county) {
             res.status(404).json({ 
                 success: false,
-                error: 'Advocate not found' 
+                error: 'County not found' 
             });
             return;
         }
 
         res.json({
             success: true,
-            data: advocate
+            data: county
         });
     } catch (err: any) {
-        console.error('Error in getAdvocateById:', err);
+        console.error('Error in getCountyById:', err);
         res.status(500).json({ 
             success: false,
-            error: 'Failed to fetch advocate',
+            error: 'Failed to fetch county',
             message: err.message 
         });
     }
 };
 
 /**
- * Get all cases for a specific advocate
+ * Get all cases for a specific county
  */
-const getAdvocateCases = async (req: Request, res: Response): Promise<void> => {
+const getCountyCases = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
         const { page = 1, limit = 20 } = req.query;
         const offset = (Number(page) - 1) * Number(limit);
 
-        const advocate = await Advocate.findByPk(id);
-        if (!advocate) {
+        const county = await County.findByPk(id);
+        if (!county) {
             res.status(404).json({ 
                 success: false,
-                error: 'Advocate not found' 
+                error: 'County not found' 
             });
             return;
         }
@@ -100,13 +103,9 @@ const getAdvocateCases = async (req: Request, res: Response): Promise<void> => {
         const { count, rows } = await Case.findAndCountAll({
             include: [
                 {
-                    model: CaseAdvocate,
-                    where: { advocateId: id },
-                    attributes: []
-                },
-                {
                     model: Court,
                     as: 'court',
+                    where: { countyId: id },
                     attributes: ['id', 'courtName', 'type']
                 }
             ],
@@ -119,7 +118,7 @@ const getAdvocateCases = async (req: Request, res: Response): Promise<void> => {
         res.json({
             success: true,
             data: {
-                advocate,
+                county,
                 cases: rows
             },
             pagination: {
@@ -130,64 +129,62 @@ const getAdvocateCases = async (req: Request, res: Response): Promise<void> => {
             }
         });
     } catch (err: any) {
-        console.error('Error in getAdvocateCases:', err);
+        console.error('Error in getCountyCases:', err);
         res.status(500).json({ 
             success: false,
-            error: 'Failed to fetch advocate cases',
+            error: 'Failed to fetch county cases',
             message: err.message 
         });
     }
 };
 
 /**
- * Create a new advocate
+ * Create a new county
  */
-const createAdvocate = async (req: Request, res: Response): Promise<void> => {
+const createCounty = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { name, type } = req.body;
+        const { county } = req.body;
 
-        if (!name) {
+        if (!county) {
             res.status(400).json({ 
                 success: false,
-                error: 'Advocate name is required' 
+                error: 'County name is required' 
             });
             return;
         }
 
-        const advocate = await Advocate.create({
-            name,
-            type: type || 'individual',
+        const newCounty = await County.create({
+            county,
             dateCreated: new Date(),
             dateModified: new Date()
         });
 
         res.status(201).json({
             success: true,
-            data: advocate,
-            message: 'Advocate created successfully'
+            data: newCounty,
+            message: 'County created successfully'
         });
     } catch (err: any) {
-        console.error('Error in createAdvocate:', err);
+        console.error('Error in createCounty:', err);
         res.status(500).json({ 
             success: false,
-            error: 'Failed to create advocate',
+            error: 'Failed to create county',
             message: err.message 
         });
     }
 };
 
 /**
- * Update an advocate
+ * Update a county
  */
-const updateAdvocate = async (req: Request, res: Response): Promise<void> => {
+const updateCounty = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
-        const { name, type } = req.body;
+        const { county } = req.body;
 
-        const [updated] = await Advocate.update(
+        const [updated] = await County.update(
             { 
-                name, 
-                type,
+                county,
                 dateModified: new Date()
             },
             { where: { id } }
@@ -196,90 +193,88 @@ const updateAdvocate = async (req: Request, res: Response): Promise<void> => {
         if (!updated) {
             res.status(404).json({ 
                 success: false,
-                error: 'Advocate not found' 
+                error: 'County not found' 
             });
             return;
         }
 
-        const updatedAdvocate = await Advocate.findByPk(id);
+        const updatedCounty = await County.findByPk(id);
 
         res.json({
             success: true,
-            data: updatedAdvocate,
-            message: 'Advocate updated successfully'
+            data: updatedCounty,
+            message: 'County updated successfully'
         });
     } catch (err: any) {
-        console.error('Error in updateAdvocate:', err);
+        console.error('Error in updateCounty:', err);
         res.status(500).json({ 
             success: false,
-            error: 'Failed to update advocate',
+            error: 'Failed to update county',
             message: err.message 
         });
     }
 };
 
 /**
- * Delete an advocate
+ * Delete a county
  */
-const deleteAdvocate = async (req: Request, res: Response): Promise<void> => {
+const deleteCounty = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
 
-        const deleted = await Advocate.destroy({
+        const deleted = await County.destroy({
             where: { id }
         });
 
         if (!deleted) {
             res.status(404).json({ 
                 success: false,
-                error: 'Advocate not found' 
+                error: 'County not found' 
             });
             return;
         }
 
         res.json({
             success: true,
-            message: 'Advocate deleted successfully'
+            message: 'County deleted successfully'
         });
     } catch (err: any) {
-        console.error('Error in deleteAdvocate:', err);
+        console.error('Error in deleteCounty:', err);
         res.status(500).json({ 
             success: false,
-            error: 'Failed to delete advocate',
+            error: 'Failed to delete county',
             message: err.message 
         });
     }
 };
 
 /**
- * Get advocate case count for analytics
+ * Get county case count for analytics
  */
-const getAdvocateCaseCount = async (req: Request, res: Response): Promise<void> => {
+const getCountyCaseCount = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { limit = 10 } = req.query;
-
-        const result = await Advocate.findAll({
+        const result = await County.findAll({
             attributes: [
                 'id',
-                'name',
-                'type',
-                [sequelize.fn('COUNT', sequelize.col('CaseAdvocates.Case.id')), 'caseCount']
+                'county',
+                [sequelize.fn('COUNT', sequelize.col('courts.Cases.id')), 'caseCount']
             ],
             include: [
                 {
-                    model: CaseAdvocate,
+                    model: Court,
+                    as: 'courts',
                     attributes: [],
                     include: [
                         {
                             model: Case,
+                            as: 'Cases',
                             attributes: []
                         }
                     ]
                 }
             ],
-            group: ['Advocate.id'],
-            order: [[sequelize.fn('COUNT', sequelize.col('CaseAdvocates.Case.id')), 'DESC']],
-            limit: Number(limit),
+            group: ['County.id'],
+            order: [[sequelize.fn('COUNT', sequelize.col('courts.Cases.id')), 'DESC']],
             raw: true
         });
 
@@ -288,21 +283,21 @@ const getAdvocateCaseCount = async (req: Request, res: Response): Promise<void> 
             data: result
         });
     } catch (err: any) {
-        console.error('Error in getAdvocateCaseCount:', err);
+        console.error('Error in getCountyCaseCount:', err);
         res.status(500).json({ 
             success: false,
-            error: 'Failed to fetch advocate case count',
+            error: 'Failed to fetch county case count',
             message: err.message 
         });
     }
 };
 
 export default {
-    getAllAdvocates,
-    getAdvocateById,
-    getAdvocateCases,
-    createAdvocate,
-    updateAdvocate,
-    deleteAdvocate,
-    getAdvocateCaseCount
+    getAllCounties,
+    getCountyById,
+    getCountyCases,
+    createCounty,
+    updateCounty,
+    deleteCounty,
+    getCountyCaseCount
 };

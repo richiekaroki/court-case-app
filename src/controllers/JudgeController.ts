@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
 import { Op } from "sequelize";
 import sequelize from "../middleware/sequelize.js";
-import { Advocate, CaseAdvocate, Case, Court } from "../models/index.js";
+import { Judge, CaseJudge, Case, Court } from "../models/index.js";
 
 /**
- * Get all advocates with pagination and search
+ * Get all judges with pagination and search
  */
-const getAllAdvocates = async (req: Request, res: Response): Promise<void> => {
+const getAllJudges = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { page = 1, limit = 20, search, type } = req.query;
+        const { page = 1, limit = 20, search } = req.query;
         const offset = (Number(page) - 1) * Number(limit);
 
         const where: any = {};
@@ -17,11 +17,7 @@ const getAllAdvocates = async (req: Request, res: Response): Promise<void> => {
             where.name = { [Op.iLike]: `%${search}%` };
         }
 
-        if (type) {
-            where.type = type;
-        }
-
-        const { count, rows } = await Advocate.findAndCountAll({
+        const { count, rows } = await Judge.findAndCountAll({
             where,
             limit: Number(limit),
             offset,
@@ -39,60 +35,60 @@ const getAllAdvocates = async (req: Request, res: Response): Promise<void> => {
             }
         });
     } catch (err: any) {
-        console.error('Error in getAllAdvocates:', err);
+        console.error('Error in getAllJudges:', err);
         res.status(500).json({ 
             success: false,
-            error: 'Failed to fetch advocates',
+            error: 'Failed to fetch judges',
             message: err.message 
         });
     }
 };
 
 /**
- * Get a single advocate by ID
+ * Get a single judge by ID
  */
-const getAdvocateById = async (req: Request, res: Response): Promise<void> => {
+const getJudgeById = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
 
-        const advocate = await Advocate.findByPk(id);
+        const judge = await Judge.findByPk(id);
 
-        if (!advocate) {
+        if (!judge) {
             res.status(404).json({ 
                 success: false,
-                error: 'Advocate not found' 
+                error: 'Judge not found' 
             });
             return;
         }
 
         res.json({
             success: true,
-            data: advocate
+            data: judge
         });
     } catch (err: any) {
-        console.error('Error in getAdvocateById:', err);
+        console.error('Error in getJudgeById:', err);
         res.status(500).json({ 
             success: false,
-            error: 'Failed to fetch advocate',
+            error: 'Failed to fetch judge',
             message: err.message 
         });
     }
 };
 
 /**
- * Get all cases for a specific advocate
+ * Get all cases for a specific judge
  */
-const getAdvocateCases = async (req: Request, res: Response): Promise<void> => {
+const getJudgeCases = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
         const { page = 1, limit = 20 } = req.query;
         const offset = (Number(page) - 1) * Number(limit);
 
-        const advocate = await Advocate.findByPk(id);
-        if (!advocate) {
+        const judge = await Judge.findByPk(id);
+        if (!judge) {
             res.status(404).json({ 
                 success: false,
-                error: 'Advocate not found' 
+                error: 'Judge not found' 
             });
             return;
         }
@@ -100,8 +96,8 @@ const getAdvocateCases = async (req: Request, res: Response): Promise<void> => {
         const { count, rows } = await Case.findAndCountAll({
             include: [
                 {
-                    model: CaseAdvocate,
-                    where: { advocateId: id },
+                    model: CaseJudge,
+                    where: { judgeId: id },
                     attributes: []
                 },
                 {
@@ -119,7 +115,7 @@ const getAdvocateCases = async (req: Request, res: Response): Promise<void> => {
         res.json({
             success: true,
             data: {
-                advocate,
+                judge,
                 cases: rows
             },
             pagination: {
@@ -130,64 +126,62 @@ const getAdvocateCases = async (req: Request, res: Response): Promise<void> => {
             }
         });
     } catch (err: any) {
-        console.error('Error in getAdvocateCases:', err);
+        console.error('Error in getJudgeCases:', err);
         res.status(500).json({ 
             success: false,
-            error: 'Failed to fetch advocate cases',
+            error: 'Failed to fetch judge cases',
             message: err.message 
         });
     }
 };
 
 /**
- * Create a new advocate
+ * Create a new judge
  */
-const createAdvocate = async (req: Request, res: Response): Promise<void> => {
+const createJudge = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { name, type } = req.body;
+        const { name } = req.body;
 
         if (!name) {
             res.status(400).json({ 
                 success: false,
-                error: 'Advocate name is required' 
+                error: 'Judge name is required' 
             });
             return;
         }
 
-        const advocate = await Advocate.create({
+        const judge = await Judge.create({
             name,
-            type: type || 'individual',
             dateCreated: new Date(),
             dateModified: new Date()
         });
 
         res.status(201).json({
             success: true,
-            data: advocate,
-            message: 'Advocate created successfully'
+            data: judge,
+            message: 'Judge created successfully'
         });
     } catch (err: any) {
-        console.error('Error in createAdvocate:', err);
+        console.error('Error in createJudge:', err);
         res.status(500).json({ 
             success: false,
-            error: 'Failed to create advocate',
+            error: 'Failed to create judge',
             message: err.message 
         });
     }
 };
 
 /**
- * Update an advocate
+ * Update a judge
  */
-const updateAdvocate = async (req: Request, res: Response): Promise<void> => {
+const updateJudge = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
-        const { name, type } = req.body;
+        const { name } = req.body;
 
-        const [updated] = await Advocate.update(
+        const [updated] = await Judge.update(
             { 
-                name, 
-                type,
+                name,
                 dateModified: new Date()
             },
             { where: { id } }
@@ -196,78 +190,77 @@ const updateAdvocate = async (req: Request, res: Response): Promise<void> => {
         if (!updated) {
             res.status(404).json({ 
                 success: false,
-                error: 'Advocate not found' 
+                error: 'Judge not found' 
             });
             return;
         }
 
-        const updatedAdvocate = await Advocate.findByPk(id);
+        const updatedJudge = await Judge.findByPk(id);
 
         res.json({
             success: true,
-            data: updatedAdvocate,
-            message: 'Advocate updated successfully'
+            data: updatedJudge,
+            message: 'Judge updated successfully'
         });
     } catch (err: any) {
-        console.error('Error in updateAdvocate:', err);
+        console.error('Error in updateJudge:', err);
         res.status(500).json({ 
             success: false,
-            error: 'Failed to update advocate',
+            error: 'Failed to update judge',
             message: err.message 
         });
     }
 };
 
 /**
- * Delete an advocate
+ * Delete a judge
  */
-const deleteAdvocate = async (req: Request, res: Response): Promise<void> => {
+const deleteJudge = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
 
-        const deleted = await Advocate.destroy({
+        const deleted = await Judge.destroy({
             where: { id }
         });
 
         if (!deleted) {
             res.status(404).json({ 
                 success: false,
-                error: 'Advocate not found' 
+                error: 'Judge not found' 
             });
             return;
         }
 
         res.json({
             success: true,
-            message: 'Advocate deleted successfully'
+            message: 'Judge deleted successfully'
         });
     } catch (err: any) {
-        console.error('Error in deleteAdvocate:', err);
+        console.error('Error in deleteJudge:', err);
         res.status(500).json({ 
             success: false,
-            error: 'Failed to delete advocate',
+            error: 'Failed to delete judge',
             message: err.message 
         });
     }
 };
 
 /**
- * Get advocate case count for analytics
+ * Get judge case count for analytics
  */
-const getAdvocateCaseCount = async (req: Request, res: Response): Promise<void> => {
+const getJudgeCaseCount = async (req: Request, res: Response): Promise<void> => {
     try {
         const { limit = 10 } = req.query;
 
-        const result = await Advocate.findAll({
+        const result = await Judge.findAll({
             attributes: [
                 'id',
                 'name',
-                'type',
-                [sequelize.fn('COUNT', sequelize.col('CaseAdvocates.Case.id')), 'caseCount']
+                [sequelize.fn('COUNT', sequelize.col('CaseJudges.Case.id')), 'caseCount']
             ],
             include: [
                 {
-                    model: CaseAdvocate,
+                    model: CaseJudge,
                     attributes: [],
                     include: [
                         {
@@ -277,8 +270,8 @@ const getAdvocateCaseCount = async (req: Request, res: Response): Promise<void> 
                     ]
                 }
             ],
-            group: ['Advocate.id'],
-            order: [[sequelize.fn('COUNT', sequelize.col('CaseAdvocates.Case.id')), 'DESC']],
+            group: ['Judge.id'],
+            order: [[sequelize.fn('COUNT', sequelize.col('CaseJudges.Case.id')), 'DESC']],
             limit: Number(limit),
             raw: true
         });
@@ -288,21 +281,21 @@ const getAdvocateCaseCount = async (req: Request, res: Response): Promise<void> 
             data: result
         });
     } catch (err: any) {
-        console.error('Error in getAdvocateCaseCount:', err);
+        console.error('Error in getJudgeCaseCount:', err);
         res.status(500).json({ 
             success: false,
-            error: 'Failed to fetch advocate case count',
+            error: 'Failed to fetch judge case count',
             message: err.message 
         });
     }
 };
 
 export default {
-    getAllAdvocates,
-    getAdvocateById,
-    getAdvocateCases,
-    createAdvocate,
-    updateAdvocate,
-    deleteAdvocate,
-    getAdvocateCaseCount
+    getAllJudges,
+    getJudgeById,
+    getJudgeCases,
+    createJudge,
+    updateJudge,
+    deleteJudge,
+    getJudgeCaseCount
 };

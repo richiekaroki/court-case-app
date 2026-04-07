@@ -26,6 +26,7 @@
     "webpack-dev-server": "^5.1.0"
   },
   "dependencies": {
-    "test_site": "file:"
+    "test_site": "file:",
+    "universal-router": "^10.0.3"
   }
 }
