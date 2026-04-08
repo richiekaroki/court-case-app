@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npx tsc && node ./dist/app.js"
+    "test:phase2": "node test/test_phase2.js",
+    "test:ingestion": "node test/test_ingestion.js",
+    "test:all": "npm run test:phase2 && npm run test:ingestion",
+    "dev": "npx tsc && node ./dist/app.js",
+    "build": "npx tsc"
   },
   "keywords": [],
   "author": "",

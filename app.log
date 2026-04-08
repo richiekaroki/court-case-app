@@ -1,0 +1,58 @@
+2026-04-08T08:42:30.128Z error: Error getting scraper state: relation "scraper_state" does not exist
+2026-04-08T08:42:44.598Z info: Processing case: INGESTION-TEST-001
+2026-04-08T08:42:46.377Z error: ❌ Failed to ingest case INGESTION-TEST-001:
+2026-04-08T08:43:00.270Z error: Error getting scraper state: relation "scraper_state" does not exist
+2026-04-08T09:07:01.276Z info: Processing case: INGESTION-TEST-001
+2026-04-08T09:07:01.506Z error: ❌ Failed to ingest case INGESTION-TEST-001:
+2026-04-08T09:17:54.830Z info: Processing case: INGESTION-TEST-001
+2026-04-08T09:33:27.916Z info: Processing case: INGESTION-TEST-001
+2026-04-08T09:33:28.225Z error: ❌ Failed to ingest case INGESTION-TEST-001:
+2026-04-08T09:38:23.885Z info: Processing case: INGESTION-TEST-001
+2026-04-08T09:40:42.137Z info: Processing case: INGESTION-TEST-001
+2026-04-08T09:40:42.183Z error: ❌ Failed to ingest case INGESTION-TEST-001:
+2026-04-08T09:48:05.475Z info: Processing case: INGESTION-TEST-001
+2026-04-08T09:48:05.548Z error: ❌ Failed to ingest case INGESTION-TEST-001:
+2026-04-08T09:49:56.917Z info: Processing case: INGESTION-TEST-002
+2026-04-08T09:49:57.043Z error: ❌ Failed to ingest case INGESTION-TEST-002:
+2026-04-08T09:50:21.127Z info: Processing case: INGESTION-TEST-002
+2026-04-08T09:50:21.199Z error: ❌ Failed to ingest case INGESTION-TEST-002:
+2026-04-08T09:58:54.045Z info: Processing case: INGESTION-TEST-1775642333779
+2026-04-08T09:58:54.378Z error: ❌ Failed to ingest case INGESTION-TEST-1775642333779:
+2026-04-08T10:04:17.496Z info: Processing case: INGESTION-TEST-1775642656808
+2026-04-08T10:04:17.604Z error: ❌ Failed to ingest case INGESTION-TEST-1775642656808:
+2026-04-08T10:07:56.389Z info: Processing case: INGESTION-TEST-1775642876128
+2026-04-08T10:07:56.458Z error: ❌ Failed to ingest case INGESTION-TEST-1775642876128:
+2026-04-08T10:16:53.017Z info: Processing case: INGESTION-TEST-1775643412655
+2026-04-08T10:16:53.821Z error: ❌ Failed to ingest case INGESTION-TEST-1775643412655:
+2026-04-08T10:31:11.167Z info: Processing case: INGESTION-TEST-1775644270878
+2026-04-08T10:31:11.288Z error: ❌ Failed to ingest case INGESTION-TEST-1775644270878:
+2026-04-08T10:42:58.061Z info: Processing case: INGESTION-TEST-1775644977537
+2026-04-08T10:42:58.177Z error: ❌ Failed to ingest case INGESTION-TEST-1775644977537:
+2026-04-08T10:45:08.370Z info: Processing case: INGESTION-TEST-1775645108073
+2026-04-08T10:45:08.495Z error: ❌ Failed to ingest case INGESTION-TEST-1775645108073:
+2026-04-08T10:49:33.622Z info: Processing case: INGESTION-TEST-1775645373296
+2026-04-08T10:56:42.277Z info: Processing case: INGESTION-TEST-1775645802063
+2026-04-08T10:58:44.283Z info: Processing case: INGESTION-TEST-1775645924019
+2026-04-08T10:58:44.319Z error: ❌ Failed to ingest case INGESTION-TEST-1775645924019:
+2026-04-08T11:01:41.921Z info: Processing case: INGESTION-TEST-1775646101334
+2026-04-08T11:01:42.041Z error: ❌ Failed to ingest case INGESTION-TEST-1775646101334:
+2026-04-08T11:10:28.050Z info: Processing case: INGESTION-TEST-1775646627581
+2026-04-08T11:10:28.482Z info: Created case INGESTION-TEST-1775646627581 with ID: undefined
+2026-04-08T11:10:28.708Z error: Failed to link judge Hon. Justice Test:
+2026-04-08T11:10:28.804Z error: Failed to link advocate Test Law Firm:
+2026-04-08T11:10:28.806Z error: Failed to create party Test Party 1:
+2026-04-08T11:10:28.812Z info: ✅ Successfully ingested case: INGESTION-TEST-1775646627581
+2026-04-08T11:10:28.834Z info: Processing case: INGESTION-TEST-1775646627581
+2026-04-08T11:10:28.925Z info: Case INGESTION-TEST-1775646627581 already exists, skipping...
+2026-04-08T11:11:07.452Z info: Processing case: INGESTION-TEST-1775646667171
+2026-04-08T11:11:07.682Z info: Created case INGESTION-TEST-1775646667171 with ID: undefined
+2026-04-08T11:11:07.721Z error: Failed to link judge Hon. Justice Test:
+2026-04-08T11:11:07.748Z error: Failed to link advocate Test Law Firm:
+2026-04-08T11:11:07.751Z error: Failed to create party Test Party 1:
+2026-04-08T11:11:07.767Z info: ✅ Successfully ingested case: INGESTION-TEST-1775646667171
+2026-04-08T11:20:39.958Z info: Processing case: INGESTION-TEST-1775647239737
+2026-04-08T11:20:40.113Z info: Created case INGESTION-TEST-1775647239737 with ID: undefined
+2026-04-08T11:20:40.169Z error: Failed to link judge Hon. Justice Test:
+2026-04-08T11:20:40.199Z error: Failed to link advocate Test Law Firm:
+2026-04-08T11:20:40.202Z error: Failed to create party Test Party 1:
+2026-04-08T11:20:40.220Z info: ✅ Successfully ingested case: INGESTION-TEST-1775647239737

@@ -1,5 +1,5 @@
 import { Op } from "sequelize";
-import sequelize from "../middleware/sequelize.js";
+import sequelize from "../../middleware/sequelize.js";
 import {
   Advocate,
   Case,
@@ -8,7 +8,7 @@ import {
   County,
   Court,
   Judge,
-} from "../models/index.js";
+} from "../../models/index.js";
 
 let courtName: any;
 let type: any;

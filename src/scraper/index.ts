@@ -1,7 +1,7 @@
 import { parentPort } from "worker_threads";
 import puppeteer, { Page, Browser, ElementHandle } from "puppeteer";
-import { createCounties, createCourts, createCases } from "../utils/scraper_data_parser.js";
-import { initialRunChecker, updateInitialRunValue } from "../utils/initial_run_checker.js";
+import { createCounties, createCourts, createCases } from "../utils/scraper/scraper_data_parser.js";    
+import { initialRunChecker, updateInitialRunValue } from "../utils/system/initial_run_checker.js";
 
 const viewPortConfig = {
     width: 1280,
