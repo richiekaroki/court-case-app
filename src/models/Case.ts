@@ -15,6 +15,7 @@ interface CaseAttributes {
   courtDivision: string;
   dateCreated: Date;
   dateModified: Date;
+  year: number;  // Year extracted from case number (e.g., 2024)
 }
 
 interface CaseCreationAttributes extends Optional<
@@ -44,6 +45,7 @@ class Case
   public courtDivision!: string;
   public dateCreated!: Date;
   public dateModified!: Date;
+  public year!: number;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -112,6 +114,11 @@ Case.init(
       allowNull: true,
       field: "case_class",
     },
+    year: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      field: "year",
+    },
     courtId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -149,14 +156,20 @@ Case.init(
         fields: ["case_number"],
         name: "unique_case_number",
       },
+      // 🔥 Unique constraint on court, case number, and year (prevents duplicate case numbers in same court/year)
+      {
+        unique: true,
+        fields: ["court_id", "case_number", "year"],
+        name: "unique_case_number_per_court_year",
+      },
       // 🔥 Single column indexes for basic filters
       {
         fields: ["court_id"],
         name: "idx_case_court_id",
       },
       {
-        fields: ["date_delivered"],
-        name: "idx_case_date_delivered",
+        fields: ["year"],
+        name: "idx_case_year",
       },
       // 🔥 NEW: Compound index for court + date queries (VERY IMPORTANT)
       {

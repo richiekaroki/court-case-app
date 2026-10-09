@@ -1,6 +1,8 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
 import { Worker } from 'node:worker_threads';
 import sequelize, { testConnection } from './middleware/sequelize.js';
 import config from './config/Config.js';
@@ -8,6 +10,47 @@ import advocateRouter from './routes/AdvocateRoutes.js';
 import caseRouter from './routes/CaseRoutes.js';
 import { setupAssociations } from './setupAssociations.js';
 import routes from './routes/index.js';
+
+// CORS configuration - whitelist allowed origins
+const allowedOrigins = config.env === 'production'
+    ? ['https://your-domain.com']  // Replace with actual production domain
+    : ['http://localhost:3000', 'http://localhost:3001']; // Development origins
+
+const corsOptions = {
+    origin: (origin: string | undefined, callback: (err: Error | null, allowed?: boolean) => void) => {
+        // Allow requests with no origin (e.g., curl, server-to-server)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+};
+
+// Rate limiting middleware - 100 requests per 15 minutes
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: { error: 'Too many requests from this IP, please try again after 15 minutes' }
+});
+
+// Security headers via Helmet
+const helmetOpts = helmet.contentSecurityPolicy({
+    directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: []
+    }
+});
 
 // Initialize Express app
 const app: Application = express();
@@ -17,7 +60,7 @@ const app: Application = express();
 // ============================================
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors(corsOptions));
 
 // Request logging middleware (development only)
 if (config.env === 'development') {
@@ -26,6 +69,12 @@ if (config.env === 'development') {
         next();
     });
 }
+
+// Security headers via Helmet
+app.use(helmetOpts);
+
+// Rate limiting middleware
+app.use(limiter);
 
 // ============================================
 // ROUTES
@@ -109,7 +158,6 @@ const initializeApp = async () => {
 
         // 5. Optional: Start scraper worker (commented out for now)
         // startScraperWorker();
-
     } catch (error) {
         console.error('❌ Failed to initialize application:', error);
         process.exit(1);

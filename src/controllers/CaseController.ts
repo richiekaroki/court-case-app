@@ -1,7 +1,129 @@
 import { Request, Response } from "express";
 import { Op } from "sequelize";
 import sequelize from "../middleware/sequelize.js";
-import { Case, Court, Judge, Advocate, Party, CaseJudge, CaseAdvocate, County } from "../models/index.js";
+import { Case, Court, County, CaseJudge, Judge, CaseAdvocate, Advocate, Party } from "../models/index.js";
+import { parseCaseNumber, isValidCaseNumber } from "../utils/caseParser.js";
+
+/**
+ * Get recent cases (for homepage)
+ */
+const getRecentCases = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        const cases = await Case.findAll({
+            limit,
+            order: [['dateDelivered', 'DESC']],
+            include: [
+                {
+                    model: Court,
+                    attributes: ['id', 'courtName', 'type']
+                }
+            ]
+        });
+
+        res.json(cases);
+    } catch (err: any) {
+        console.error('Error in getRecentCases:', err);
+        res.status(500).json({ error: 'Failed to fetch recent cases', message: err.message });
+    }
+};
+
+/**
+ * Look up a case by case number, party name, or court station
+ * Query params: caseNumber, partyName, court
+ */
+const lookupCase = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const caseNumber = req.query.caseNumber as string;
+        const partyName = req.query.partyName as string;
+        const court = req.query.court as string;
+
+        const where: any = {};
+        let parsed;
+
+        // Build search conditions for caseNumber
+        if (caseNumber) {
+            parsed = parseCaseNumber(caseNumber);
+
+            if (parsed) {
+                // Case number was successfully parsed - search using parsed components
+                where[Op.or] = [
+                    { caseNumber: { [Op.iLike]: `%${parsed.original}%` } },
+                    { title: { [Op.iLike]: `%${parsed.caseType}%` } },
+                ];
+
+                if (parsed.court) {
+                    where[Op.or].push({
+                        courtName: { [Op.iLike]: `%${parsed.court}%` }
+                    });
+                }
+            } else {
+                // Case number couldn't be parsed - do general text search
+                where[Op.or] = [
+                    { caseNumber: { [Op.iLike]: `%${caseNumber}%` } },
+                    { title: { [Op.iLike]: `%${caseNumber}%` } },
+                    { parties: { [Op.iLike]: `%${caseNumber}%` } }
+                ];
+            }
+        }
+
+        // Add party name search if provided
+        if (partyName) {
+            if (where[Op.or]) {
+                // Already have OR conditions, add party as another OR option
+                where[Op.or].push({ parties: { [Op.iLike]: `%${partyName}%` } });
+            } else {
+                // Start a new OR condition
+                where[Op.or] = [{ parties: { [Op.iLike]: `%${partyName}%` } }];
+            }
+        }
+
+        // Add court station search if provided
+        if (court) {
+            if (where[Op.or]) {
+                where[Op.or].push({ courtName: { [Op.iLike]: `%${court}%` } });
+            } else {
+                where[Op.or] = [{ courtName: { [Op.iLike]: `%${court}%` } }];
+            }
+        }
+
+        const { count, rows } = await Case.findAndCountAll({
+            where,
+            limit: 20,
+            offset: 0,
+            order: [['dateDelivered', 'DESC']],
+            include: [
+                {
+                    model: Court,
+                    attributes: ['id', 'courtName', 'type']
+                }
+            ]
+        });
+
+        // If we had a valid parsed case number but found no results,
+        // show a clear message
+        let notFoundMessage = null;
+        if (caseNumber && !parsed) {
+            notFoundMessage = `Case number "${caseNumber}" could not be parsed. Please check the format (e.g., "Civil Appeal No. E123 of 2024").`;
+        }
+
+        res.json({
+            cases: rows,
+            pagination: {
+                total: count,
+                page: 1,
+                limit: 20,
+                totalPages: Math.ceil(count / 20)
+            },
+            parsed: caseNumber ? { original: caseNumber, valid: !!parsed } : null,
+            notFoundMessage
+        });
+    } catch (err: any) {
+        console.error('Error in lookupCase:', err);
+        res.status(500).json({ error: 'Failed to lookup case', message: err.message });
+    }
+};
 
 /**
  * Get all cases with pagination and filtering
@@ -117,31 +239,6 @@ const getCaseById = async (req: Request, res: Response): Promise<void> => {
     } catch (err: any) {
         console.error('Error in getCaseById:', err);
         res.status(500).json({ error: 'Failed to fetch case', message: err.message });
-    }
-};
-
-/**
- * Get recent cases (for homepage)
- */
-const getRecentCases = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const limit = parseInt(req.query.limit as string) || 10;
-
-        const cases = await Case.findAll({
-            limit,
-            order: [['dateDelivered', 'DESC']],
-            include: [
-                {
-                    model: Court,
-                    attributes: ['id', 'courtName', 'type']
-                }
-            ]
-        });
-
-        res.json(cases);
-    } catch (err: any) {
-        console.error('Error in getRecentCases:', err);
-        res.status(500).json({ error: 'Failed to fetch recent cases', message: err.message });
     }
 };
 
@@ -286,5 +383,6 @@ export default {
     getCaseCountByCourt,
     createCase,
     updateCase,
-    deleteCase
+    deleteCase,
+    lookupCase
 };

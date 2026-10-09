@@ -670,6 +670,7 @@ export const createCases = async (caseHeaderAndValueObjects: any) => {
           caseClass: caseMetaData_.caseClass,
           courtId: caseMetaData_.court,
           caseAction: caseMetaData_.caseAction,
+          year: new Date(caseMetaData_.dateDelivered).getFullYear(),
           dateCreated: new Date(),
           dateModified: new Date(),
           citation: caseMetaData_.citation,

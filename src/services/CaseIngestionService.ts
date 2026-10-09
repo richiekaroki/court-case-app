@@ -297,6 +297,7 @@ export const ingestCase = async (
         courtId: finalCourtId,
         dateCreated: new Date(),
         dateModified: new Date(),
+        year: new Date(parsedCase.dateDelivered).getFullYear(),
       },
       transaction,
     });

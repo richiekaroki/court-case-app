@@ -9,3 +9,7 @@ export { default as Judge } from "./Judge.js";
 export { default as Party } from "./Party.js";
 export { default as CaseJudge } from "./CaseJudge.js";
 export { default as RelatedCases } from "./RelatedCases.js";
+export { default as User } from "./User.js";
+export { default as WatchlistEntry } from "./WatchlistEntry.js";
+export { default as Reminder } from "./Reminder.js";
+export { default as HearingHistory } from "./HearingHistory.js";
