@@ -1,0 +1,38 @@
+name: Kenya Court Cases CI
+
+on:
+  pull_request:
+    branches: [ main, master ]
+  push:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript compile check
+        run: npx tsc
+
+      - name: Run unit tests (case parser)
+        run: node test/test_case_parser.js
+
+      - name: Run ingestion tests
+        run: node test/test_ingestion.js
+
+      - name: Generate test coverage (if applicable)
+        run: npm run test:ingestion 2>&1 || true
