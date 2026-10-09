@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npx tsc && node test/test_case_parser.js && npm run test:ingestion",
     "test:phase2": "node test/test_phase2.js",
     "test:ingestion": "node test/test_ingestion.js",
     "test:all": "npm run test:phase2 && npm run test:ingestion",
@@ -23,10 +23,14 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@types/express-validator": "^2.20.33",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "express-rate-limit": "^8.7.1",
+    "express-validator": "^7.3.2",
+    "helmet": "^8.3.0",
     "kenya-court-cases-app": "file:",
     "mysql2": "^3.10.2",
     "pg": "^8.12.0",
